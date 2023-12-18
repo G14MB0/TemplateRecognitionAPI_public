@@ -1,0 +1,32 @@
+# Bytecode files
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.env/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# OS-specific files
+.DS_Store  # For macOS
+Thumbs.db  # For Windows
+
+# IDE-specific files (e.g., PyCharm, VSCode)
+.idea/
+.vscode/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Log files
+*.log
+
+# Other files that should not be version-controlled
+*.csv
+*.json
+
+*.dbc
