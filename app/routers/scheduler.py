@@ -3,6 +3,8 @@ from fastapi import APIRouter
 
 from lib.timerHandler import timerHandler as th
 from lib.iod.reporting import *
+from app.routers.pythonBus.utils import stopAllLog
+from app.routers.pythonBus.pythonBus import dd
 from app import schemas
 import os
 import json
@@ -46,6 +48,9 @@ def checkDeadline():
             print("       END OF THE IOD PERIOD        ")
             print("************************************")
             print(f"curent time: {current_time} -- target time: {target_time}")
+            stopAllLog()
+            dd.stopLog()
+
 
 
 
@@ -57,7 +62,7 @@ def startIod(data: schemas.startIod):
         data (schemas.startIod): _description_
     """    
     # Calculate the target time (data.interval is the timedelta in days)
-    target_time = datetime.datetime.now() + datetime.timedelta(days=data.interval)
+    target_time = datetime.datetime.now() + datetime.timedelta(hours=data.interval)
     # Store the target time in a file
     with open(log_folder+'/target_time.json', 'w') as file:
         json.dump({'target_time': target_time.isoformat()}, file)

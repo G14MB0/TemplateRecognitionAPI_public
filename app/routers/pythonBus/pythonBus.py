@@ -150,3 +150,6 @@ async def websocket_endpoint(websocket: WebSocket):
         print("WebSocket disconnected")
         # Exit the while loop
         return
+    except:
+        print("WebSocket disconnected")
+        return
