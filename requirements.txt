@@ -1,1 +1,1 @@
-uvicorn fastapi schedule psutil cantools python-can
+uvicorn fastapi schedule psutil cantools python-can requests

@@ -1,7 +1,17 @@
 from tkinter import Tk, filedialog
 
 
-def tk_selectFile(fileType: str):
+def tk_selectFile(fileType: str = "") -> str:
+    """ Use tkinter to opens a windows file selection dialog
+
+        Errors are not handles. If any, it returns an empty string
+
+    Args:
+        fileType (str, optional): defining a fileType (like .txt) add the restriction to file selection. Defaults to "".
+
+    Returns:
+        str: the absolute file path
+    """    
     try:
         root = Tk()
         root.withdraw()   
@@ -13,10 +23,17 @@ def tk_selectFile(fileType: str):
         print(file)
         return file
     except:
-        return []
+        return ""
     
 
-def tk_selectFolder():
+def tk_selectFolder() -> str:
+    """Use tkinter to opens a windows folder selection dialog
+
+    Errors are not handles. If any, it returns an empty string
+
+    Returns:
+        str: the folder absolute path
+    """    
     try:
         root = Tk()
         root.withdraw()
@@ -25,4 +42,4 @@ def tk_selectFolder():
         folder = filedialog.askdirectory()
         return folder
     except:
-        return []
+        return ""

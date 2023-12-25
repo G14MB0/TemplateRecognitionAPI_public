@@ -1,0 +1,46 @@
+site_name: Backend of a Simple App
+# pip install mkdocstrings[python]>=0.18 per installare Griffe altrimenti nun va
+nav:
+  - Index: 'index.md'
+  - Getting Started: 'getStart.md'
+  - Usage: 'usage.md'
+  - The main file: 'main.md'
+  - lib:
+    - tkinter: 'lib/tkinter.md'
+  - Info: 'info.md'
+  - Release Note: 'release-notes.md'
+
+
+
+
+
+plugins:
+  - search
+  - snippets
+  - mkdocstrings:
+      docstring_style: google  # or "numpydoc"
+      python:
+        options:
+          members_order: source
+          show_root_full_path: true
+          show_root_members_full_path: true
+      # processes:
+      #   private-members: true
+  
+
+
+theme:
+  name: material
+
+  palette: 
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
