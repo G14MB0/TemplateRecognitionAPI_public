@@ -37,6 +37,9 @@ PORT = 12345
 WORKERS = 1
 OVERRIDE = False # Force close any other service on the same port (Not a good practice, must be used carefully or modified)
 
+RELOAD = True # Reload the app after any save
+APPPATH = "app.main:app"
+
 ### Parameters for openapi schema autosave
 OPENAPI = False # If True, save a local copy of the openapi schema created by fastAPI
 FILEPATH = "/openapi.json"  # the file path
@@ -63,7 +66,7 @@ def serve(host: str, port: int, workers: int, override: bool = False, reload: bo
     if reload:
         if appPath == "":
             raise RuntimeError("The parameter appPath must be defined when reload is True! (something like app.main:app)")
-        uvicorn.run("app.main:app", port=port, host=host, workers=workers, reload=reload)
+        uvicorn.run(appPath, port=port, host=host, workers=workers, reload=reload)
     else:
         uvicorn.run(app, port=port, host=host, workers=workers, reload=reload)
 
@@ -140,7 +143,7 @@ def generateAPIdocs(api_url: str, output_file: str):
 if __name__ == "__main__":
 
     hideConsole()  #hide console. will work only on packaged distribution
-    process = serve(HOST, PORT, WORKERS, OVERRIDE)
+    process = serve(HOST, PORT, WORKERS, OVERRIDE, reload=RELOAD, appPath=APPPATH)
     if OPENAPI:
         generateAPIdocs(f'http://{HOST}:{PORT}/openapi.json', FILEPATH)
 

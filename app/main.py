@@ -25,16 +25,22 @@ uvicorn app.main:app --reload #start the server without the main.py file
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-# from .routes import strategyAPI, backtesterAPI
+from app.routers import user, auth, inventories
+
+from app import models
+from app.database import engine
 
 from contextlib import asynccontextmanager
 
 import threading
 
-import sys
 import io
 import os
 import datetime
+
+
+# This bind the database with the models (creating the tables if not present and all the stuff)
+models.Base.metadata.create_all(bind=engine) 
 
 
 class DualOutput:
@@ -121,8 +127,9 @@ app.add_middleware(
 )
 
 
-# app.include_router(tkinter.router)
-
+app.include_router(user.router)
+app.include_router(auth.router)
+app.include_router(inventories.router)
 
 
 @app.get("/")
