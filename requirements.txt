@@ -1,7 +1,1 @@
-uvicorn
-fastapi 
-schedule 
-psutil 
-requests 
-python-jose[cryptography]
-networkx
+uvicorn fastapi schedule psutil cantools python-can requests python-jose[cryptography]
