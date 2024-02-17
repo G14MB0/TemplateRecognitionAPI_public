@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 
-SQLACLHEMY_DATABASE_URL = 'postgresql://postgres:Ginopino96@127.0.0.1/simpleApp_Backend'
+SQLACLHEMY_DATABASE_URL = 'postgresql://postgres:<PASSWORD>@127.0.0.1/simpleApp_Backend'
 
 engine = create_engine(SQLACLHEMY_DATABASE_URL)
 
