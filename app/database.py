@@ -7,9 +7,9 @@ be extended in the models.py to create our table models
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from app.config import settings
 
-
-SQLACLHEMY_DATABASE_URL = 'postgresql://postgres:Ginopino96@127.0.0.1/simpleApp_Backend'
+SQLACLHEMY_DATABASE_URL = f'postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}'
 
 engine = create_engine(SQLACLHEMY_DATABASE_URL)
 
