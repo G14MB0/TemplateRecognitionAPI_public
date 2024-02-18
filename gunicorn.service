@@ -1,0 +1,14 @@
+[Unit]
+Description=Authentication and Data Management Interface
+After=network.target
+
+[Service]
+User=g14mb0
+Group=g14mb0
+WorkingDirectory=/home/g14mb0/app/src/
+Environment="PATH=/home/g14mb0/app/venv/bin"
+EnvironmentFile=/home/g14mb0/.env
+ExecStart=/home/g14mb0/app/venv/bin/gunicorn -w 2 -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:12345
+
+[Install]
+WantedBy=multi-user.target
