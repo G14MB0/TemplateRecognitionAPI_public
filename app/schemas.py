@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, Any
+from typing import Optional
 import json
 
 from pydantic import BaseModel, validator, EmailStr #used as an isistance() to check data type
@@ -65,16 +65,33 @@ class TokenData(BaseModel):
 ##           INVENTORY OPERATION SCHEMAS            ##
 ######################################################
 
-class InventoryCreate(BaseModel):
+class DataCreate(BaseModel):
     name: str
-    description: Optional[str] = None
+    data: str
 
-class InventoryResponse(InventoryCreate):
+    # # Serialize data when dumping to JSON
+    # class Config:
+    #     json_encoders = {
+    #         dict: lambda v: json.dumps(v)
+    #     }
+        
+    # @validator('data', pre=True, each_item=False)
+    # def parse_json(cls, v):
+    #     if isinstance(v, str):
+    #         try:
+    #             return json.loads(v)
+    #         except ValueError:
+    #             raise ValueError(f"Unable to parse string to dict: {v}")
+    #     return v
+
+
+class DataResponse(DataCreate):
     id: int
-    user_id: int
+    owner_id: int
     created_at: datetime
 
-class InventoryUpdate(BaseModel):
+
+class DataUpdate(BaseModel):
     name: str
-    description: Optional[str] = None
-    user_id: int
+    data: int
+

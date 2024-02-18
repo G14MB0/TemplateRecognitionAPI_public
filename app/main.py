@@ -25,7 +25,7 @@ uvicorn app.main:app --reload #start the server without the main.py file
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import user, auth, inventories
+from app.routers import data, user, auth
 
 from app import models
 from app.database import engine
@@ -39,39 +39,8 @@ import os
 import datetime
 
 
-# This bind the database with the models (creating the tables if not present and all the stuff)
-models.Base.metadata.create_all(bind=engine) 
-
-
-class DualOutput:
-    def __init__(self, base_name):
-        now = datetime.datetime.now()
-        formatted_date = now.strftime('%Y-%m-%d_%H-%M-%S')
-        file_name = f"{base_name}_{formatted_date}.txt"
-        os.makedirs(os.path.dirname(file_name), exist_ok=True)
-        self.file = open(file_name, 'a')
-        self.buffer = io.StringIO()
-
-    def write(self, data):
-        self.file.write(data)
-        self.buffer.write(data)
-
-    def getvalue(self):
-        return self.buffer.getvalue()
-
-    def flush(self):
-        self.file.flush()
-        self.buffer.flush()
-
-    def close(self):
-        self.file.close()
-    
-    def isatty(self):
-        return False
-
-# Creare una nuova istanza DualOutput per gestire l'output
-# output_manager = DualOutput('D:\\ready2test\\log\\Ready2tesT_IOD\\live_output')
-# sys.stdout = output_manager
+# This bind the database with the models (creating the tables if not present and all the stuff). no need for this if using Alembic 
+# models.Base.metadata.create_all(bind=engine) 
 
 
 origins = [
@@ -110,7 +79,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="simpleApp_Backend",
+    title="Authentication and Data Management Interface",
     version="0.1",
     root_path="",
     lifespan=lifespan  # this handle the lifespan method define before
@@ -129,12 +98,12 @@ app.add_middleware(
 
 app.include_router(user.router)
 app.include_router(auth.router)
-app.include_router(inventories.router)
+app.include_router(data.router)
 
 
 @app.get("/")
 def root():
-    return {"message": "This is the simpleApp_Backend API. Go to ./docs to see documentations"}
+    return {"message": "This are the APIs. Go to ./docs to see documentations"}
 
 
 @app.get("/health")
@@ -161,13 +130,3 @@ def killAll():
     It can't return nothing since the app stops
     """    
     os._exit(0)
-
-@app.get("/console-output")
-def get_console_output():
-    """this method return the console output that is collected by the "DualOutput" object output_manager
-
-    Returns:
-        console output
-    """    
-    output = output_manager.getvalue()
-    return {"output": output}
