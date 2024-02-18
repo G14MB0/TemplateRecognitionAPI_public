@@ -39,9 +39,6 @@ WORKERS = 1
 RELOAD = True # Reload the app after any save
 APPPATH = "app.main:app"
 
-### Parameters for openapi schema autosave
-OPENAPI = False # If True, save a local copy of the openapi schema created by fastAPI
-
 
 
 def serve(host: str, port: int, workers: int, reload: bool = False, appPath: str = ""):
