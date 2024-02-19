@@ -83,8 +83,6 @@ app = FastAPI(
     version="0.1",
     root_path="/api/v1",
     lifespan=lifespan,  # this handle the lifespan method define before
-    docs_url=None,
-    redoc_url=None
 )
 
 
