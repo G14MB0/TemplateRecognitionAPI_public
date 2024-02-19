@@ -81,7 +81,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Authentication and Data Management Interface",
     version="0.1",
-    root_path="/api/v1",
+    root_path="",
     lifespan=lifespan,  # this handle the lifespan method define before
 )
 
@@ -96,9 +96,9 @@ app.add_middleware(
 )
 
 
-app.include_router(user.router)
-app.include_router(auth.router)
-app.include_router(data.router)
+app.include_router(user.router, prefix="/api/v1")
+app.include_router(auth.router, prefix="/api/v1")
+app.include_router(data.router, prefix="/api/v1")
 
 
 
