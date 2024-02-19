@@ -13,7 +13,7 @@ from app.config import settings
 
 #this line of code simply create a scheme for the password automatically checking 
 #from the login API requestForm
-oaut2_scheme = OAuth2PasswordBearer(tokenUrl='login')  ## this must coincide with the ./login endopoint without the ./
+oaut2_scheme = OAuth2PasswordBearer(tokenUrl='api/v1/login')  ## this must coincide with the ./login endopoint without the ./
 
 #SECRET_KEY
 #Algorithm
