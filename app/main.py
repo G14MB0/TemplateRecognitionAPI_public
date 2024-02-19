@@ -81,8 +81,10 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Authentication and Data Management Interface",
     version="0.1",
-    root_path="",
-    lifespan=lifespan  # this handle the lifespan method define before
+    root_path="/api/v1",
+    lifespan=lifespan,  # this handle the lifespan method define before
+    docs_url=None,
+    redoc_url=None
 )
 
 
@@ -101,6 +103,7 @@ app.include_router(auth.router)
 app.include_router(data.router)
 
 
+
 @app.get("/")
 def root():
     return {"message": "This are the APIs. Go to ./docs to see documentations"}
@@ -111,22 +114,3 @@ def healt():
     """this is just an enpoint to reach for alive
     """    
     return {"message": "the server is online!"}
-
-
-@app.get("/pid")
-def getPID():
-    """this method return the pid (process identifierc)
-
-    Returns:
-        process pid, web format
-    """    
-    current_pid = os.getpid()
-    return {"current_pid": current_pid}
-
-
-@app.get("/close")
-def killAll():
-    """termiate the current app using os module.
-    It can't return nothing since the app stops
-    """    
-    os._exit(0)

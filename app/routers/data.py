@@ -40,13 +40,22 @@ def get_data(db: Session = Depends(get_db), current_user: int = Depends(oauth2.g
 def create_data(data: schemas.DataCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
 
     try:
-        new_data = models.Data(name=data.name, data=data.data, owner_id=current_user.id)
-
-        db.add(new_data)
-        db.commit()
-        db.refresh(new_data)
-
-        return new_data
+        # Check if the data already exists based on name and owner_id
+        existing_data = db.query(models.Data).filter(models.Data.name == data.name, models.Data.owner_id == current_user.id).first()
+        
+        if existing_data:
+            # If data exists, update it
+            existing_data.data = data.data
+            db.commit()
+            db.refresh(existing_data)
+            return existing_data
+        else:
+            # If data does not exist, create a new record
+            new_data = models.Data(name=data.name, data=data.data, owner_id=current_user.id)
+            db.add(new_data)
+            db.commit()
+            db.refresh(new_data)
+            return new_data
     
     except IntegrityError as e:
         db.rollback()  # Rollback the session to a clean state
@@ -77,92 +86,3 @@ def delete_data(name: str, db: Session = Depends(get_db), current_user: int = De
     return {"message": f"data with name {name} correctly deleted"}
 
 
-# @router.get("/{name}", response_model=schemas.InventoryResponse)
-# def get_inventory_name(name: str, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
-#     """get user's inventory by name
-
-#     Args:
-#         name (str): name
-
-#     Raises:
-#         HTTPException: name doesn't exists
-
-#     Returns:
-#         inventory: class InventoryResponse(BaseModel):
-#     """    
-
-    
-#     inventory = db.query(models.Inventories).where(models.Inventories.name == name, models.Inventories.user_id == current_user.id).first()
-
-#     if not inventory:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'inventory with name {name} does not exist')
-
-#     return inventory
-
-
-# @router.put("/", response_model=schemas.UserResponse)
-# def modify_user(updated_user: schemas.UserUpdate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
-#     """_summary_
-
-#     Args:
-#         updated_user (schemas.UserUpdate): class UserUpdate(BaseModel):
-#                                                 id: Optional[int] = None
-#                                                 email: Optional[EmailStr] = None
-#                                                 name: Optional[str]
-#                                                 role: Optional[str]
-
-#     Raises:
-#         HTTPException: if missing ID and email, at lease one of them must be provided
-#         HTTPException: if the user doesn't exists, so nothing to modify
-
-#     Returns:
-#         user: class UserResponse(BaseModel):
-#                 created_at: datetime
-#                 email: EmailStr
-#                 name: str
-#                 id: int
-#                 role: str
-#     """    
-#     # cursor.execute(f'SELECT * FROM users WHERE id = {id}')
-#     # user = cursor.fetchone()
-    
-#     if updated_user.email is None and updated_user.id is None:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Need to provide user ID or user email!')
-    
-#     if current_user.role != "administrator" and updated_user.role == "administrator":
-#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Need privileged access to get this data. your role: {current_user.role}")
-
-
-#     if current_user.role != "administrator" and \
-#             ((updated_user.id and current_user.id != updated_user.id) or \
-#              (updated_user.email and current_user.email != updated_user.email)):
-#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Need privileged access to modify this data. your role: {current_user.role}")
-
-#     # Construct the query based on email or id
-#     user_query = None
-#     if updated_user.id:
-#         user_query = db.query(models.Users).filter(models.Users.id == updated_user.id)
-#         # Check if the user exist
-#         user = user_query.first()
-#         if user == None:
-#             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'user with id {updated_user.id} does not exist')
-#     else:
-#         user_query = db.query(models.Users).filter(models.Users.email == updated_user.email)
-#         # Check if the user exist
-#         user = user_query.first()
-#         if user == None:
-#             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'user with email {updated_user.email} does not exist')
-
-    
-
-#     # Update the user's attributes
-#     user_data = updated_user.model_dump()
-#     # Remove 'id' and 'email' keys if they exist to NOT update them
-#     user_data.pop('id', None)
-#     user_data.pop('email', None)
-
-#     user_query.update(user_data)
-
-#     db.commit()
-
-#     return user_query.first()
