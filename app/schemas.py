@@ -34,35 +34,9 @@ class UserResponse(BaseModel):
         orm_mode = True
 
 
-######################################################
-##             LOGIN OPERATION SCHEMAS              ##
-######################################################
-
-class UserLogin(UserCreate):
-    id: Optional[int]
-    class Config:
-        orm_mode = True
-    # pass
-
-
 
 ######################################################
-##             TOKEN OPERATION SCHEMAS              ##
-######################################################
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
-class TokenData(BaseModel):
-    id: Optional[int] = None
-
-
-
-
-######################################################
-##           INVENTORY OPERATION SCHEMAS            ##
+##           DATA OPERATION SCHEMAS            ##
 ######################################################
 
 class DataCreate(BaseModel):

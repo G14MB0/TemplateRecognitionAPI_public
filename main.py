@@ -26,31 +26,61 @@
 import uvicorn
 from app.main import app
 import psutil 
-
+import sys
 # used to retrive openapi schema from fastAPI and save it in a file
 import requests
+from multiprocessing import freeze_support
+from lib.logging.main import configure_logger
+import logging
+
+
+configure_logger()
+
 
 ### Parameters for uvicorn server
 # HOST = "127.0.0.1"
 HOST = "0.0.0.0"
-PORT = 12345
+PORT = 7386
 WORKERS = 1
+OVERRIDE = False # Force close any other service on the same port (Not a good practice, must be used carefully or modified)
 
-RELOAD = True # Reload the app after any save
+# Check if the application is frozen (built with PyInstaller)
+if getattr(sys, 'frozen', False):
+    # Application is running from a PyInstaller bundle
+    RELOAD = False
+else:
+    # Application is running in a development environment
+    RELOAD = False
 APPPATH = "app.main:app"
 
+### Parameters for openapi schema autosave
+OPENAPI = False # If True, save a local copy of the openapi schema created by fastAPI
+FILEPATH = "/openapi.json"  # the file path
 
 
-def serve(host: str, port: int, workers: int, reload: bool = False, appPath: str = ""):
+
+def serve(host: str, port: int, workers: int, override: bool = False, reload: bool = False, appPath: str = ""):
     """This method start the FastAPI application using uvicorn
 
     Args:
         host (str): the app ip address
         port (int): the app port
         workers (int): if need multiprocess. 
+        override (bool, optional): !!!NOT THE BEST PRACTICE!!! If want to terminate a process that is already running on the port. Defaults to False.
         reload (bool, optional): is passed as the reload parameter of uvicorn. auto restart the app at any changes in the code.
         appPath (str, optional): if reload is True, the app argument must be passed as a string (like the one used directly in terminal)
     """    
+
+    # Retrieve the root logger
+    logger = logging.getLogger()
+
+    logger.info("Starting the Application")
+    logger.warning("WARNING: starting the application")
+
+    if override:
+        # !!!NOT THE BEST PRACTICE!!! Check if a process is already running on the specified port and terminate it if found 
+        if is_process_running_on_port(port):
+            terminate_process_on_port(port)
 
     # Start the Uvicorn server
     if reload:
@@ -63,7 +93,78 @@ def serve(host: str, port: int, workers: int, reload: bool = False, appPath: str
 
 
 
+def is_process_running_on_port(port: int) -> bool:
+    """Try to connect on a service on a specific port and return True if the service is running
+    Args:
+        port (int): TCP/UDP PORT
+
+    Returns:
+        bool: is the service running on that port?
+    """    
+    for conn in psutil.net_connections(kind="inet"):
+        if conn.laddr.port == port:
+            return True
+    return False
+
+def terminate_process_on_port(port: int, startWith: str = ""):
+    """Terminate a service on a specific TCP/UDP port.
+
+    Args:
+        port (int): TCP/UDP port.
+        startWith (str, optional): If provided, only terminate processes whose name starts with this string.
+    """    
+
+    def _kill(process, target_port):
+        """Terminate a process if it's using the specified port."""
+        for conn in process.connections(kind="inet"):
+            if conn.laddr.port == target_port:
+                print(f"Terminating process {process.pid}")
+                try:
+                    process.terminate()
+                except psutil.Error as e:
+                    print(f"Error terminating process {process.pid}: {e}")
+
+    for proc in psutil.process_iter(attrs=['pid', 'name']):
+        try:
+            if startWith and proc.info["name"].startswith(startWith):
+                _kill(proc, port)
+            elif not startWith:
+                _kill(proc, port)
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+
+
+def hideConsole():
+    """when packaged with pyinstaller (console mode), if you want to hide (not close) the console, use this method
+    """    
+    try:
+        import ctypes
+        whnd = ctypes.windll.kernel32.GetConsoleWindow()
+        if whnd != 0:
+            ctypes.windll.user32.ShowWindow(whnd, 0)
+    except:
+        pass
+
+
+def generateAPIdocs(api_url: str, output_file: str):
+    """Auto calls the /openapi.json endpoint of fastAPI and save the content in a json file.
+
+    Args:
+        api_url (str): the application openapi.json endpoint
+        output_file (str): the name of the output file (relative path allowed)
+    """    
+    response = requests.get(api_url)
+    
+    with open('openapi.json', 'w') as f:
+        f.write(response.text)
+
+
+
 if __name__ == "__main__":
-    process = serve(HOST, PORT, WORKERS, reload=RELOAD, appPath=APPPATH)
+    freeze_support()
+    # hideConsole()  #hide console. will work only on packaged distribution
+    process = serve(HOST, PORT, WORKERS, OVERRIDE, reload=RELOAD, appPath=APPPATH)
+    if OPENAPI:
+        generateAPIdocs(f'http://{HOST}:{PORT}/openapi.json', FILEPATH)
 
     

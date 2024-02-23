@@ -1,6 +1,5 @@
 from app import schemas, utils
 from app.database import get_db
-from app import oauth2
 from app import models
 
 from sqlalchemy.orm import Session
@@ -19,7 +18,7 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[schemas.DataResponse])
-def get_data(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user), name: str = ""):
+def get_data(db: Session = Depends(get_db), name: str = ""):
     """Get all the data for that user (users table rows) or filtered by a name
 
     Returns:
@@ -37,7 +36,7 @@ def get_data(db: Session = Depends(get_db), current_user: int = Depends(oauth2.g
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.DataResponse)
-def create_data(data: schemas.DataCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+def create_data(data: schemas.DataCreate, db: Session = Depends(get_db)):
 
     try:
         # Check if the data already exists based on name and owner_id
@@ -71,7 +70,7 @@ def create_data(data: schemas.DataCreate, db: Session = Depends(get_db), current
 
 
 @router.delete("/{name}")
-def delete_data(name: str, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+def delete_data(name: str, db: Session = Depends(get_db)):
     if name != "":
         data = data = db.query(models.Data).filter(models.Data.owner_id == current_user.id, models.Data.name == name).first()
         if data is None:

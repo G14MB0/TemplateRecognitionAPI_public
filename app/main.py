@@ -25,7 +25,7 @@ uvicorn app.main:app --reload #start the server without the main.py file
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import data, user, auth
+from app.routers import data
 
 from app import models
 from app.database import engine
@@ -34,18 +34,14 @@ from contextlib import asynccontextmanager
 
 import threading
 
-import io
-import os
-import datetime
 
 
 # This bind the database with the models (creating the tables if not present and all the stuff). no need for this if using Alembic 
-# models.Base.metadata.create_all(bind=engine) 
 
 
 origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "http://localhost:7387",
+    "http://127.0.0.1:7387",
 ]
 
 
@@ -55,6 +51,7 @@ async def lifespan(app: FastAPI):
     is the new way to deal with event in fastapi since the classical app.on("event") is deprecated
     """    
 
+    models.Base.metadata.create_all(bind=engine) 
     # Code here runs after the app startup
     print("---------------------------------------------------------------")
     print("The app has started and this is the lifespan method telling you")
@@ -96,8 +93,6 @@ app.add_middleware(
 )
 
 
-app.include_router(user.router, prefix="/api/v1")
-app.include_router(auth.router, prefix="/api/v1")
 app.include_router(data.router, prefix="/api/v1")
 
 
