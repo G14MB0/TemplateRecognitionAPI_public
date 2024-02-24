@@ -42,20 +42,28 @@ def load_all_templates() -> Dict[str, cv2.typing.MatLike]:
         logger.warning("Template Folder not configured, unable to load templates")
         raise ValueError("Template Folder not configured, unable to load  templates")
 
+    all_templates = {}
     # Iterate over all entries in the directory
     for entry in os.listdir(template_folder):
-        # Create absolute path
         abs_path = os.path.join(template_folder, entry)
-        # Check if it's a file and not a directory
         if os.path.isfile(abs_path):
-            template_paths.append(abs_path)
-    
-    # All themplate dicitonary
-    allTemplate = {}
+            base = os.path.splitext(os.path.basename(abs_path))[0]
+            if base.endswith("_mask"):
+                # This is a mask file
+                template_name = base[:-5]  # Remove "_mask" from the end to get the template name
+                if template_name in all_templates:
+                    # Load and assign the mask to the corresponding template entry
+                    all_templates[template_name]['mask'] = cv2.imread(abs_path, cv2.IMREAD_GRAYSCALE)
+                else:
+                    # Create a new entry for this template with only a mask
+                    all_templates[template_name] = {'mask': cv2.imread(abs_path, cv2.IMREAD_GRAYSCALE)}
+            else:
+                # This is a template file
+                if base in all_templates:
+                    # Update the existing entry with the template image
+                    all_templates[base]['value'] = cv2.imread(abs_path)
+                else:
+                    # Create a new entry for this template
+                    all_templates[base] = {'value': cv2.imread(abs_path), 'mask': None}
 
-    # Iterate through all the template_path and load them using cv2, then add to the dictionary
-    for template_path in template_paths:
-        base = os.path.basename(template_path)
-        allTemplate[os.path.splitext(base)[0]] = cv2.imread(template_path)
-
-    return allTemplate
+    return all_templates
