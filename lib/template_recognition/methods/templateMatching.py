@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from typing import List, Tuple
- 
+from lib import local_config
 
 
 def globalMatching(frame: cv2.typing.MatLike,
@@ -34,14 +34,17 @@ def globalMatching(frame: cv2.typing.MatLike,
     """
     if mask is not None:
         if not isinstance(mask, np.ndarray):
+            return False, [0, 0], template_name, max_val
             raise ValueError("Mask must be a numpy ndarray")
         if mask.shape[:2] != template.shape[:2]:
+            return False, [0, 0], template_name, max_val
             raise ValueError("Mask dimensions must match the template dimensions")
         mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
 
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     template_gray = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
-    threshold = 0.95
+    # threshold = local_config.readLocalConfig().get("MATCHING_THRESHOLD", 0.7)
+    threshold = 0.85
 
     if search_area != [(0, 0), (0, 0)]:
         top_left_search, bottom_right_search = search_area
@@ -53,10 +56,10 @@ def globalMatching(frame: cv2.typing.MatLike,
         res = cv2.matchTemplate(frame_gray, template_gray, cv2.TM_CCOEFF_NORMED, mask=mask)
 
     _, max_val, _, max_loc = cv2.minMaxLoc(res)
-
     if max_val > threshold:
         if search_area != [(0, 0), (0, 0)]:
             max_loc = (max_loc[0] + top_left_search[0], max_loc[1] + top_left_search[1])
         return True, list(max_loc), template_name, max_val
     else:
         return False, [0, 0], template_name, max_val
+    

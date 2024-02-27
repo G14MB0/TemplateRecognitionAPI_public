@@ -22,6 +22,7 @@ if not config_folder_path.exists():
 template = '''
 template_folder=D:/users/s005859/Pictures/templateRecognition/template
 saving_folder=D:/users/s005859/Pictures/templateRecognition/saving
+MATCHING_THRESHOLD=0.75
 '''
 
 
