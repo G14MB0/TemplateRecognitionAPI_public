@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from typing import List, Tuple
-from lib import local_config
+
 
 
 def globalMatching(frame: cv2.typing.MatLike,
@@ -43,7 +43,6 @@ def globalMatching(frame: cv2.typing.MatLike,
 
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     template_gray = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
-    # threshold = local_config.readLocalConfig().get("MATCHING_THRESHOLD", 0.7)
     threshold = 0.85
 
     if search_area != [(0, 0), (0, 0)]:

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple, List
 import json
 
 from pydantic import BaseModel, validator, EmailStr #used as an isistance() to check data type
@@ -69,3 +69,30 @@ class DataUpdate(BaseModel):
     name: str
     data: int
 
+
+
+######################################################
+##      SETTING OPERATION SCHEMA      ##
+######################################################
+    
+class SetSettings(BaseModel):
+    name: str
+    value: str
+
+
+######################################################
+##      TEMPLATE MATCHING SCHEMAS      ##
+######################################################
+    
+class InitializeManager(BaseModel):
+    processNumber: int = 4
+    resolution: Tuple[int, int] = (1920, 1080)
+    multiprocess: bool = True 
+    camIndex: int = 1 
+    showImage: bool = False
+    saveFrame: bool = True
+    showImageGray: bool = False
+
+
+class TemplateTriggering(BaseModel):
+    templates: List = []

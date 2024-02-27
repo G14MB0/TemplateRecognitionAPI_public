@@ -1,27 +1,9 @@
 import cv2
 from typing import List, Tuple
-import logging
 from lib import local_config
 from datetime import datetime
-
-
-# Retrieve the root logger
-logger = logging.getLogger()
-
-
-from functools import wraps
-def logFunctionDetail(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        args_repr = [repr(a) for a in args]  # Convert all arguments to their string representation
-        kwargs_repr = [f"{k}={v!r}" for k, v in kwargs.items()]  # Convert all keyword arguments
-        signature = ", ".join(args_repr + kwargs_repr)  # Combine all strings together
-
-        logger.info(f"Calling {func.__name__}({signature})")
-
-        result = func(*args, **kwargs)
-        return result
-    return wrapper
+from lib.global_var import logFunctionDetail
+from lib.global_var import logger
 
 
 
@@ -49,12 +31,11 @@ def load_template(template_path: str, grayScale: bool = True) -> cv2.typing.MatL
         return template
 
 
-
 @logFunctionDetail
 def save_frame(frame: cv2.typing.MatLike,
                frame_name: str,
                 withMatching: bool = True,
-                position: List[Tuple[int, int], Tuple[int, int]] = [(0,0), (0,0)],
+                position: List[Tuple[int]] = [(0,0), (0,0)],
                 rectangleColor: Tuple[int, int, int] = (0,255,0),
                 rectangleThickness: int = 2):
     """Save a frame with a rectangle in the matching position if "withMatching" is True, else save just the frame
@@ -84,3 +65,27 @@ def save_frame(frame: cv2.typing.MatLike,
     else:
         cv2.imwrite(f'{saving_folder}/{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{frame_name}', frame)
 
+
+
+def saveFrameWithTemplates(frame: cv2.typing.MatLike,
+                            results: dict,
+                            saving_folder: str,
+                            rectangleColor: Tuple[int, int, int] = (0,255,0),
+                            rectangleThickness: int = 2):
+    
+    for key, value in results.items():
+        top_left = (value["position"][0], value["position"][1])
+        bottom_right =  (top_left[0]+value["dimension"][1], top_left[1]+value["dimension"][0])
+        cv2.rectangle(frame, top_left, bottom_right, rectangleColor, rectangleThickness)
+
+        # Determina se c'è spazio sopra il rettangolo per il testo
+        labelSize, baseLine = cv2.getTextSize(key, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+        if top_left[1] - labelSize[1] - baseLine >= 0:  # Se c'è spazio sopra
+            textOrg = (top_left[0], top_left[1] - baseLine)
+        else:  # Altrimenti, posiziona il testo sotto il rettangolo
+            textOrg = (top_left[0], bottom_right[1] + labelSize[1] + baseLine)
+
+        # Disegna il nome del template sopra o sotto il rettangolo
+        cv2.putText(frame, key, textOrg, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+    
+    cv2.imwrite(f'{saving_folder}/{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{"TM"}.jpg', frame)

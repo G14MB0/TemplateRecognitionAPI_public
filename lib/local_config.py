@@ -80,7 +80,7 @@ def writeLocalConfigVariable(variable_name, variable_value):
         # File exists, read the existing variables
         with open(config_file_path, 'r') as file:
             for line in file:
-                parts = line.strip().split(' = ')
+                parts = line.strip().split('=')
                 if len(parts) == 2:
                     variables_dict[parts[0]] = parts[1]
 
@@ -90,5 +90,5 @@ def writeLocalConfigVariable(variable_name, variable_value):
         # Write the updated content back to the file
         with open(config_file_path, 'w') as file:
             for key, value in variables_dict.items():
-                file.write(f"{key} = {value}\n")
+                file.write(f"{key}={value}\n")
         print(f"Updated variable '{variable_name}' in the configuration file with value {variable_value}.")

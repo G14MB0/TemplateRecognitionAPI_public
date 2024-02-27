@@ -18,7 +18,7 @@ def getSettings():
 
 
 @router.post("/")
-def setSetting(data: schemas.SetSetting):
+def setSetting(data: schemas.SetSettings):
     local_config.writeLocalConfigVariable(data.name, data.value)
     return local_config.readLocalConfig()
 

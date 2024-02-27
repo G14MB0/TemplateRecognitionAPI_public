@@ -6,9 +6,7 @@ from fastapi import APIRouter
 from lib.tkinter.methods import *
 import os
 import subprocess
-from lib.pythonBus.pythonBus import log_folder
 from lib.local_config import config_folder_path
-from lib.iod.reporting import report_folder
 
 
 router = APIRouter(
@@ -50,29 +48,5 @@ async def selectFolder():
     print(folder_path)
     return folder_path
 
-
-@router.get("/openfolder/{folder}")
-def openFolder(folder):
-    if folder == "config":
-        # Check if the path is a valid directory
-        if os.path.isdir(config_folder_path):
-            # Open the folder using the default file explorer
-            subprocess.Popen(f'explorer "{config_folder_path}"')
-        else:
-            return "The folder does not exist."
-    elif folder == "report":
-        # Check if the path is a valid directory
-        if os.path.isdir(report_folder):
-            # Open the folder using the default file explorer
-            subprocess.Popen(f'explorer "{report_folder}"')
-        else:
-            return "The folder does not exist."
-    elif folder == "log":
-        # Check if the path is a valid directory
-        if os.path.isdir(log_folder):
-            # Open the folder using the default file explorer
-            subprocess.Popen(f'explorer "{log_folder}"')
-        else:
-            return "The folder does not exist."
 
 

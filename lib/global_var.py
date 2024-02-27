@@ -3,6 +3,26 @@
 """
 import time
 from functools import wraps
+from lib import local_config
+import logging
+
+# Retrieve the root logger
+logger = logging.getLogger()
+
+
+from functools import wraps
+def logFunctionDetail(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        args_repr = [repr(a) for a in args]  # Convert all arguments to their string representation
+        kwargs_repr = [f"{k}={v!r}" for k, v in kwargs.items()]  # Convert all keyword arguments
+        signature = ", ".join(args_repr + kwargs_repr)  # Combine all strings together
+
+        logger.info(f"Calling {func.__name__}({signature})")
+
+        result = func(*args, **kwargs)
+        return result
+    return wrapper
 
 def fps(func):
     @wraps(func)
@@ -24,4 +44,27 @@ def fps(func):
         return result
     return wrapper
 
-g_matching_threshold = 0.9
+# template matching threshold, default to 0.8
+g_matching_threshold = local_config.readLocalConfig().get("MATCHING_THRESHOLD", 0.8)
+
+
+
+class GlobalManager:
+    """This class handle the template matching manager object globally
+    """    
+    def __init__(self):
+        self.template_matching_manager = None
+        pass
+    
+    def segGlobalManager(self, obj):
+        self.template_matching_manager = obj
+    
+    def getGlobalManager(self):
+        return self.template_matching_manager
+    
+# initialize the globalManager object
+globalManager = GlobalManager()
+
+
+
+

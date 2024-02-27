@@ -25,7 +25,7 @@ uvicorn app.main:app --reload #start the server without the main.py file
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import data
+from app.routers import data, setting, templateMatching
 
 from app import models
 from app.database import engine
@@ -94,6 +94,8 @@ app.add_middleware(
 
 
 app.include_router(data.router, prefix="/api/v1")
+app.include_router(setting.router, prefix="/api/v1")
+app.include_router(templateMatching.router, prefix="/api/v1")
 
 
 

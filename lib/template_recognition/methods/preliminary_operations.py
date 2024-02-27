@@ -1,11 +1,8 @@
-import logging
 from lib import local_config
 from typing import List, Dict
 import cv2
 import os
-
-# Retrieve the root logger
-logger = logging.getLogger()
+from lib.global_var import logger
 
 
 from functools import wraps
