@@ -1,13 +1,24 @@
-site_name: Backend of a Simple App
+site_name: Audio, Image and Text Recognition APIs
 # pip install mkdocstrings[python]>=0.18 per installare Griffe altrimenti nun va
 nav:
-  - Index: 'index.md'
+  - Home: 'index.md'
   - Getting Started: 'getStart.md'
+  - API Reference: 'api-reference.md'
   - Usage: 'usage.md'
-  - The main file: 'main.md'
-  - lib:
-    - tkinter: 'lib/tkinter.md'
-  - Info: 'info.md'
+  - Modules:
+    - lib:
+      - tkinter: 'lib/tkinter.md'
+      - template recognition: 'lib/templateRecognition.md'
+      - local configuration: 'lib/local_config.md'
+    - app:
+      - main: 'app/main.md'
+      - database: 'app/database.md'
+      - schemas: 'app/schemas.md'
+      - models: 'app/models.md'
+      - routers: 
+        - setting: 'app/routers/setting.md'
+        - templateMatching: 'app/routers/templateMatching.md'
+        - tkinter: 'app/routers/tkinter.md'
   - Release Note: 'release-notes.md'
 
 
@@ -31,7 +42,6 @@ plugins:
 
 theme:
   name: material
-
   palette: 
     # Palette toggle for light mode
     - scheme: default

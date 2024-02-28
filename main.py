@@ -21,8 +21,10 @@
 # In order to start the app, simply run this file.
 # Modify first the capitalized parameter to match preferences!!!
 
-
-
+import os
+import subprocess
+import time
+import threading
 import uvicorn
 from app.main import app
 import psutil 
@@ -48,14 +50,22 @@ OVERRIDE = False # Force close any other service on the same port (Not a good pr
 if getattr(sys, 'frozen', False):
     # Application is running from a PyInstaller bundle
     RELOAD = False
+    OPENAPI = False # If True, save a local copy of the openapi schema created by fastAPI
+    application_path = sys._MEIPASS
+    DOCSSERVE = False
 else:
     # Application is running in a development environment
     RELOAD = False
+    OPENAPI = True # If True, save a local copy of the openapi schema created by fastAPI
+    application_path = "./"
+    DOCSSERVE = True
+
+
 APPPATH = "app.main:app"
 
-### Parameters for openapi schema autosave
-OPENAPI = False # If True, save a local copy of the openapi schema created by fastAPI
-FILEPATH = "/openapi.json"  # the file path
+### Parameters for openapi schema autosave and mkdocs
+FILEPATH = os.path.join(application_path, 'docs/openapi.json')
+YMLPATH = os.path.join(application_path, 'mkdocs.yml')
 
 
 
@@ -153,18 +163,40 @@ def generateAPIdocs(api_url: str, output_file: str):
         api_url (str): the application openapi.json endpoint
         output_file (str): the name of the output file (relative path allowed)
     """    
+    print("Generating API json schema")
+    time.sleep(3)
     response = requests.get(api_url)
     
-    with open('openapi.json', 'w') as f:
+    with open(output_file, 'w') as f:
         f.write(response.text)
+
+def run_mkdocs(port, ymlPath):
+    command = f"mkdocs serve -a 0.0.0.0:{port} -f {ymlPath}"
+    # stdout e stderr sono reindirizzati a subprocess.PIPE per poter catturare l'output
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    
+    print(f"Running mkdocs on http://0.0.0.0:{port}")
+    # Aspetta che il processo termini 
+    # process.wait()
+    # Cattura e stampa l'output e gli errori (opzionale)
+    stdout, stderr = process.communicate()
+    print("STDOUT:", stdout.decode())
+    print("STDERR:", stderr.decode())
 
 
 
 if __name__ == "__main__":
     freeze_support()
+
+    if OPENAPI:
+        if HOST == "0.0.0.0":
+            threading.Thread(target=generateAPIdocs, args=(f'http://127.0.0.1:{PORT}/openapi.json', FILEPATH)).start()
+    
+    if DOCSSERVE:
+        threading.Thread(target=run_mkdocs, args=(7687,YMLPATH)).start()
+
     # hideConsole()  #hide console. will work only on packaged distribution
     process = serve(HOST, PORT, WORKERS, OVERRIDE, reload=RELOAD, appPath=APPPATH)
-    if OPENAPI:
-        generateAPIdocs(f'http://{HOST}:{PORT}/openapi.json', FILEPATH)
+    
 
     

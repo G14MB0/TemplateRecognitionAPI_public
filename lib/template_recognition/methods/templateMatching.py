@@ -50,9 +50,9 @@ def globalMatching(frame: cv2.typing.MatLike,
         cut_frame = frame_gray[top_left_search[1]:bottom_right_search[1], top_left_search[0]:bottom_right_search[0]]
         if cut_frame.shape[0] < template_gray.shape[0] or cut_frame.shape[1] < template_gray.shape[1]:
             raise ValueError("Search area is too small compared to the template size.")
-        res = cv2.matchTemplate(cut_frame, template_gray, cv2.TM_CCOEFF_NORMED, mask=mask)
+        res = cv2.matchTemplate(cut_frame, template_gray, cv2.TM_CCORR_NORMED, mask=mask)
     else:
-        res = cv2.matchTemplate(frame_gray, template_gray, cv2.TM_CCOEFF_NORMED, mask=mask)
+        res = cv2.matchTemplate(frame_gray, template_gray, cv2.TM_CCORR_NORMED, mask=mask)
 
     _, max_val, _, max_loc = cv2.minMaxLoc(res)
     if max_val > threshold:

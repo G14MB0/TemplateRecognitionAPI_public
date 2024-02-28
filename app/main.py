@@ -20,12 +20,16 @@
 
 
 '''
-uvicorn app.main:app --reload #start the server without the main.py file
+
 '''
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import data, setting, templateMatching
+from fastapi.staticfiles import StaticFiles
+
+import os
+import sys
 
 from app import models
 from app.database import engine
@@ -76,7 +80,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Authentication and Data Management Interface",
+    title="Audio, Image and text recognition APIs",
+    description="You can find a full documentation of this App port 7687",
     version="0.1",
     root_path="",
     lifespan=lifespan,  # this handle the lifespan method define before
@@ -97,6 +102,15 @@ app.include_router(data.router, prefix="/api/v1")
 app.include_router(setting.router, prefix="/api/v1")
 app.include_router(templateMatching.router, prefix="/api/v1")
 
+# Check if the application is frozen (built with PyInstaller)
+if getattr(sys, 'frozen', False):
+    # Application is running from a PyInstaller bundle
+    application_path = sys._MEIPASS
+else:
+    # Application is running in a development environment
+    application_path = "./"
+
+app.mount("/mkdocs", StaticFiles(directory=f"{application_path}/site", html=True), name="mkdocs")
 
 
 @app.get("/")

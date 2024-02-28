@@ -1,4 +1,4 @@
-from app import schemas, utils
+from app import schemas
 from app.database import get_db
 from app import models
 

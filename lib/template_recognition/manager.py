@@ -125,24 +125,20 @@ class Manager():
     def startProcesses(self):
         """start the multiprocess execution pool.
         """        
-        try:
-            if self.multiprocess:
-                start_time = time.time()  # Record the start time
-                print("starting processes, please wait... ")
-                
-                # create process pool
-                self.pool = multiprocessing.Pool(processes=self.processesNumber)
+        if self.multiprocess:
+            start_time = time.time()  # Record the start time
+            print("starting processes, please wait... ")
+            
+            # create process pool
+            self.pool = multiprocessing.Pool(processes=self.processesNumber)
 
-                time.sleep(1)
-                end_time = time.time()  # Record the end time after all processes have started
-                print(f"Time taken to start worker processes: {end_time - start_time} seconds")
-                return
-            else:
-                return
-        finally:
-            if self.multiprocess:
-                self.pool.close()  # Chiude il pool di processi
-                self.pool.join()   # Attende che tutti i processi nel pool terminino
+            time.sleep(1)
+            end_time = time.time()  # Record the end time after all processes have started
+            print(f"Time taken to start worker processes: {end_time - start_time} seconds")
+            return
+        else:
+            return
+        
 
     
 
@@ -202,7 +198,7 @@ class Manager():
                         if result["presence"]:
                             results[template_name] = {"position": result["position"], "confidence": result["confidence"], "dimension": self.templates[template_name]["value"].shape}
 
-
+                print(template_name, results)
             self.setLastLiveValue(results)
 
             for key, item in results.items():
@@ -282,12 +278,13 @@ class Manager():
             # ret, frame = (True, cv2.imread("./image.jpg"))
             if not ret:
                 print("Can't receive frame (stream end?). Exiting ...")
-                break
+                raise RuntimeError("Can't receive frame (stream end?). Exiting ...")
             
             if self.showImageGray: frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             cv2.imshow('Matching Result', frame)
             # Break the loop on pressing 'q'
             if cv2.waitKey(1) & 0xFF == ord('q'):
+                cv2.destroyAllWindows()
                 break
 
 
@@ -384,6 +381,8 @@ class Manager():
         if self.multiprocess:
             self.pool.close()  # Chiude il pool di processi
             self.pool.join()   # Attende che tutti i processi nel pool terminino
+
+        cv2.destroyAllWindows()
 
 
     ######################################################

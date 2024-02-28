@@ -1,7 +1,9 @@
 '''
 Here the table models are defined using sqlalchemy by expanding the Base from database.py
 
-models are defined as classes and columns as attributes
+models are defined as classes and columns as attributes.
+
+You can find all models in API reference
 '''
 
 from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint

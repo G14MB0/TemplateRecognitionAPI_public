@@ -27,6 +27,11 @@ MATCHING_THRESHOLD=0.75
 
 
 def readLocalConfig():
+    """Read the file of local configuration and return a dicitonary containing each setting and relative value
+
+    Returns:
+        dict: setting dictionary
+    """    
     # Check if the file exists, and create it if it doesn't
     if not config_file_path.is_file():
         try:
@@ -64,6 +69,12 @@ def readLocalConfig():
 
 
 def writeLocalConfigVariable(variable_name, variable_value):
+    """Write to the local configuration file a value
+
+    Args:
+        variable_name (str): the new or existing setting name
+        variable_value (str): the corresponding value
+    """    
     # Initialize an empty dictionary for the variables
     variables_dict = {}
     # Check if the config file exists

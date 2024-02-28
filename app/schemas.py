@@ -1,3 +1,8 @@
+"""
+This module contain pydantic schemas used to validate APIs I/O.
+You can find all the schemas in API reference
+"""
+
 from typing import Optional, Tuple, List
 import json
 

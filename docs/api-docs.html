@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>API Documentation</title>
+  <!-- Redoc library -->
+  <script src="https://cdn.jsdelivr.net/npm/redoc/bundles/redoc.standalone.js"></script>
+  <script>
+    // Carica il file di configurazione prima di inizializzare Redoc
+    fetch('./redoc-congif.json')
+      .then(response => response.json())
+      .then(config => {
+        Redoc.init('./openapi.json', config);
+      });
+  </script>
+</head>
+<body>
+  <!-- Container for Redoc -->
+  <redoc spec-url='./openapi.json'></redoc>
+  <script>
+    Redoc.init('./openapi.json');
+  </script>
+</body>
+</html>

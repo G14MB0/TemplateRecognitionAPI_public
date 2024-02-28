@@ -67,7 +67,6 @@ def initializeManager(data: schemas.InitializeManager):
 @router.get("/loadtemplate")
 def loadTemplates():
     """ **Reload all the template from the templates folder**
-
     """    
     try:
         wp.loadAllTemplates()
@@ -93,21 +92,35 @@ def startProcesses():
         return {"error": str(e)}
     
 
+@router.get("/startvideo")
+def startLiveVideo():
+    """ Start a live video of the camera. 
+    """    
+    try:
+        wp.startLiveVideo()
+        return {"message": "video started correctly, press 'q' on video screen to stop it"}
+    except Exception as e:
+        return {"error": str(e)}
+    
+
 
 @router.post("/check/instant")
 def checkInstantTrigger(data: schemas.TemplateTriggering):
-    """ **Start an instant check** to check if *templates* are in the current frame
-    The manager must be initialized and the process pools need to be started.
-    Otherwise it raise an error
-    Args:
-        templates (list, optional): list of templates name. Defaults to [].
+    """Start the instant trigger check routine. It returns the results of template matching
 
+    
     Returns:
-        *dict*: dictionary of results
-    """    
+        dict: {"resutls": result dictionary}
+
+    result dicitonary:
+    - templateName:
+        - template position (x,y) from top-left corner of the frame
+        - confidence (norm %) of the results
+        - dimension [y,x, channel] where channel is the number of dimensions (if 3 generally is a colored image)
+    """        
     try:
-        wp.startInstantTrigger(data.templates)
-        return {"message": "template updated correctly"}
+        res = wp.startInstantTrigger(data.templates)
+        return {"results": res}
     except Exception as e:
         print(traceback.print_exc())
         return {"error": str(e)}
