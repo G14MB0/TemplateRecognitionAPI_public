@@ -27,6 +27,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import data, setting, templateMatching
 from fastapi.staticfiles import StaticFiles
+from app.socketMethods import *
 
 import os
 import sys
@@ -56,11 +57,14 @@ async def lifespan(app: FastAPI):
     """    
 
     models.Base.metadata.create_all(bind=engine) 
+    server_thread = threading.Thread(target=start_server, args=(stop_event,))
+    server_thread.start()
+    print("Server started with lifespan.")
     # Code here runs after the app startup
     print("---------------------------------------------------------------")
     print("The app has started and this is the lifespan method telling you")
     print("---------------------------------------------------------------")
-
+    
     yield  # This yield separates startup from shutdown code
 
     # Code here runs after the app stops
@@ -68,6 +72,9 @@ async def lifespan(app: FastAPI):
     # this is used to print all the thread that remains appended after the application close (if some opened by you), if any thread but MainThread is
     # still there, you need to handle that thread correctly in order to make it close before the app shutdown.
     # this can be appreciate if you use "reload" parameter, since it not works with not correctly closed thread
+    stop_event.set()
+    server_thread.join()
+    print("Server stopped with lifespan.")
     print("This is a list of all appended that need to be closed, if there are many apart of 'MainThread', please fix it,.")
     for thread in threading.enumerate(): 
         print(thread.name)
@@ -123,3 +130,5 @@ def healt():
     """this is just an enpoint to reach for alive
     """    
     return {"message": "the server is online!"}
+
+

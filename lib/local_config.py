@@ -22,7 +22,8 @@ if not config_folder_path.exists():
 template = '''
 template_folder=D:/users/s005859/Pictures/templateRecognition/template
 saving_folder=D:/users/s005859/Pictures/templateRecognition/saving
-MATCHING_THRESHOLD=0.75
+MATCHING_THRESHOLD=0.9
+is_colored=1
 '''
 
 
@@ -52,7 +53,7 @@ def readLocalConfig():
                     if len(parts) == 2:
                         # Assign the variable name and value to the dictionary
                         variables_dict[parts[0]] = parts[1]
-                        
+            
             return variables_dict
     else:
         # Read the file and parse it into a dictionary

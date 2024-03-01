@@ -3,10 +3,10 @@ This module contain pydantic schemas used to validate APIs I/O.
 You can find all the schemas in API reference
 """
 
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Dict
 import json
 
-from pydantic import BaseModel, validator, EmailStr #used as an isistance() to check data type
+from pydantic import BaseModel, validator, EmailStr, Field #used as an isistance() to check data type
 from datetime import datetime
 
 
@@ -90,14 +90,41 @@ class SetSettings(BaseModel):
 ######################################################
     
 class InitializeManager(BaseModel):
-    processNumber: int = 4
-    resolution: Tuple[int, int] = (1920, 1080)
-    multiprocess: bool = True 
-    camIndex: int = 1 
-    showImage: bool = False
-    saveFrame: bool = True
-    showImageGray: bool = False
+    processNumber: int = Field(default=4, description="The number of processes to be utilized. Defaults to 4.")
+    resolution: Tuple[int, int] = Field(default=(1920, 1080), description="The resolution of the camera as a tuple (width, height). Defaults to 1920x1080.")
+    multiprocess: bool = Field(default=True, description="Flag to enable or disable multiprocessing. Defaults to True.")
+    camIndex: int = Field(default=1, description="The index of the camera to be used. Defaults to 1.")
+    showImage: bool = Field(default=False, description="Flag to show the processed image in a window, works only with Live Matching, no instant matching. Defaults to False.")
+    saveFrame: bool = Field(default=True, description="Flag to enable or disable saving of matched frames locally. Defaults to True.")
+    showImageGray: bool = Field(default=False, description="Flag to show the processed image in grayscale (used only if showImage is True). Defaults to False.")
+    
+    class Config:
+        title = "Initialize Manager Configuration"
+        description = "This model is used to initialize and configure the manager for image processing tasks. It includes settings for process number, image resolution, multiprocessing enablement, camera index, and flags for displaying and saving images."
+
 
 
 class TemplateTriggering(BaseModel):
-    templates: List = []
+    templates: List[str] = Field(default=[], description="LList of template names. Each element is the name of a template (string) without its file extension.")
+
+
+class TemplateTriggeringResponseBase(BaseModel):
+    position: List[int] = Field(..., description="Position of detected template, relative to the current frame. Origin at the top left corner. Format: [x,y].")
+    confidence: float = Field(..., description="Confidence level of the template match, expressed as a float between 0 and 1, where 1 represents 100% confidence.")
+
+    class Config:
+        title = "Template Triggering Response Base"
+
+
+
+class TemplateTriggeringResponse(BaseModel):
+    template: Dict[str, TemplateTriggeringResponseBase] = Field(..., description="Dictionary of template matching results. Each key is the template name, and each value is an instance of `TemplateTriggeringResponseBase` containing the match results.")
+
+    class Config:
+        schema_extra = {
+            "description": "This model is used as input to trigger a one-shot template matching"
+        }
+
+
+class ChangeThreshold(BaseModel):
+    threshold: float = Field(description="Value of threshold. Reset at any manager initialization. limits: [0,1]")

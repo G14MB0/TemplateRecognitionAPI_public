@@ -10,6 +10,6 @@ if __name__ == "__main__":
 
     manager.startProcesses()
     print(manager.templates)
-    manager.start()
+    manager.startLiveSearching()
 
 

@@ -45,7 +45,7 @@ def fps(func):
     return wrapper
 
 # template matching threshold, default to 0.8
-g_matching_threshold = local_config.readLocalConfig().get("MATCHING_THRESHOLD", 0.8)
+g_matching_threshold = local_config.readLocalConfig().get("MATCHING_THRESHOLD", 0.9)
 
 
 

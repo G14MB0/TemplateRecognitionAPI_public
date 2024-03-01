@@ -5,6 +5,7 @@ from lib.template_recognition.methods import preliminary_operations as po
 from lib.template_recognition.methods.templateMatching import globalMatching
 from lib.template_recognition.methods.file_operation import saveFrameWithTemplates
 from lib import local_config
+from lib.global_var import g_matching_threshold
 
 from typing import Any, Tuple, List
 
@@ -26,7 +27,7 @@ def worker(task, calculate_fps=None):
     """    
     while True:
         
-        res = globalMatching(task["frame"], task["template"], task["template_name"], task.get("searchArea", [(0, 0), (0, 0)]), task.get("mask", None))
+        res = globalMatching(task["frame"], task["template"], task["template_name"], search_area=task.get("searchArea", [(0, 0), (0, 0)]), mask=task.get("mask", None), threshold=task.get("threshold", None), isColored=task.get("isColored", False))
         if calculate_fps: calculate_fps()
         
         return {"presence": res[0], "position": res[1], "template_name": res[2], "confidence": res[3]}
@@ -69,6 +70,7 @@ class Manager():
         self.show = showImage
         self.showImageGray = showImageGray
         self.run = True
+        self.isColored = local_config.readLocalConfig().get("is_colored", True)
 
         self.processesNumber = processesNumber
         self.multiprocess = multiprocess
@@ -77,6 +79,8 @@ class Manager():
         self.pool = None
         self.processes = []
         self.lastLiveValue = {}
+
+        self.threshold = float(g_matching_threshold)
 
         #____________________________________________________#
         #-      PRELIMINARY OPERATIONS                      -#
@@ -179,7 +183,7 @@ class Manager():
             tasks = []
             for template_name, template in self.templates.items():
                 if template_name in templates:
-                    task = {"frame": frame, "template": template["value"], "template_name": template_name, "mask": template["mask"]}
+                    task = {"frame": frame, "template": template["value"], "template_name": template_name, "mask": template["mask"], "threshold": self.threshold, "isColored": self.isColored}
 
                     if not self.multiprocess:
                         # do template matching and append to results the result
@@ -198,7 +202,6 @@ class Manager():
                         if result["presence"]:
                             results[template_name] = {"position": result["position"], "confidence": result["confidence"], "dimension": self.templates[template_name]["value"].shape}
 
-                print(template_name, results)
             self.setLastLiveValue(results)
 
             for key, item in results.items():
@@ -241,7 +244,7 @@ class Manager():
             tasks = []
             for template_name, template in self.templates.items():
                 if template_name in templates:
-                    task = {"frame": frame, "template": template["value"], "template_name": template_name, "mask": template["mask"]}
+                    task = {"frame": frame, "template": template["value"], "template_name": template_name, "mask": template["mask"], "threshold": self.threshold, "isColored": self.isColored}
 
                     if not self.multiprocess:
                         # do template matching and append to results the result
@@ -312,7 +315,7 @@ class Manager():
                 results = {}
                 tasks = []
                 for template_name, template in self.templates.items():
-                    task = {"frame": frame, "template": template["value"], "template_name": template_name, "mask": template["mask"]}
+                    task = {"frame": frame, "template": template["value"], "template_name": template_name, "mask": template["mask"], "threshold": self.threshold, "isColored": self.isColored}
 
                     if not self.multiprocess:
                         # do template matching and append to results the result

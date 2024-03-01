@@ -8,7 +8,9 @@ def globalMatching(frame: cv2.typing.MatLike,
                    template: cv2.typing.MatLike,
                    template_name: str,
                    search_area: List[Tuple[int, int]],
-                   mask: cv2.typing.MatLike = None) -> Tuple[bool,List[int], str, float]:
+                   mask: cv2.typing.MatLike = None,
+                   threshold: float = 0.9,
+                   isColored: bool = False) -> Tuple[bool,List[int], str, float]:
     
     """
     Performs template matching over a given frame to find a specified template within an optional search area.
@@ -22,6 +24,8 @@ def globalMatching(frame: cv2.typing.MatLike,
         search_area (List[Tuple[int, int]]): The top-left and bottom-right coordinates defining the search area within the frame.
                                              If the search area is [(0, 0), (0, 0)], the entire frame is searched.
         mask (np.ndarray, optional): An optional mask to apply on the template for focused searching. Must be the same size as the template.
+        threshold (float, optional): The matching threshold defined in a range from 0 to 1. default to 0.9
+        isColored (bool, optional): using colored (3 dimension) frame and templates if True, else grayscale. default to Fasle, grayscale
 
     Raises:
         ValueError: If the mask is not of type np.ndarray or its dimensions do not match the template.
@@ -41,18 +45,24 @@ def globalMatching(frame: cv2.typing.MatLike,
             raise ValueError("Mask dimensions must match the template dimensions")
         mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
 
-    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    template_gray = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
-    threshold = 0.85
+
+    if bool(int(isColored)) == True:
+        frame_gray = frame 
+        template_gray = template
+    else:
+        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        template_gray = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+
+    threshold = threshold
 
     if search_area != [(0, 0), (0, 0)]:
         top_left_search, bottom_right_search = search_area
         cut_frame = frame_gray[top_left_search[1]:bottom_right_search[1], top_left_search[0]:bottom_right_search[0]]
         if cut_frame.shape[0] < template_gray.shape[0] or cut_frame.shape[1] < template_gray.shape[1]:
             raise ValueError("Search area is too small compared to the template size.")
-        res = cv2.matchTemplate(cut_frame, template_gray, cv2.TM_CCORR_NORMED, mask=mask)
+        res = cv2.matchTemplate(cut_frame, template_gray, cv2.TM_CCOEFF_NORMED, mask=mask)
     else:
-        res = cv2.matchTemplate(frame_gray, template_gray, cv2.TM_CCORR_NORMED, mask=mask)
+        res = cv2.matchTemplate(frame_gray, template_gray, cv2.TM_CCOEFF_NORMED, mask=mask)
 
     _, max_val, _, max_loc = cv2.minMaxLoc(res)
     if max_val > threshold:

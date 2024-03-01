@@ -125,3 +125,28 @@ def checkInstantTrigger(data: schemas.TemplateTriggering):
         print(traceback.print_exc())
         return {"error": str(e)}
 
+
+
+@router.post("/mod/threshold")
+def changeThreshold(data: schemas.ChangeThreshold):
+    """Change the threshold vlaue of the manager object. it's atemporary change.
+    
+    """        
+    try:
+        res = wp.changeLocalTrheshold(data.threshold)
+        return res
+    except Exception as e:
+        print(traceback.print_exc())
+        return {"error": str(e)}
+    
+
+@router.get("/stop")
+def stopProcesses():
+    """Stop any template matching operations and close multiprocessing pool
+    """        
+    try:
+        wp.stopProcesses()
+        return {"message": "Operations terminated, multiprocess pool closed"}
+    except Exception as e:
+        print(traceback.print_exc())
+        return {"error": str(e)}

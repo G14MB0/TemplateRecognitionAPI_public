@@ -108,6 +108,18 @@ def stopProcesses():
 
 
 
+def changeLocalTrheshold(value: int):
+    if value < 0 or value > 1:
+        raise ValueError("Trheashold should be in [0,1]")
+    else:
+        manager = globalManager.getGlobalManager()
+        if manager:
+            manager.threshold = value
+            return {"message": f"threshold value correctly set to {value}"}
+        else:
+            raise RuntimeError("manager not initialized yet, call initializeManager")
+
+
 ######################################################
 ##      FUNCTIONS TO BE DEFINED      ##
 ######################################################
