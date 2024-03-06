@@ -8,6 +8,7 @@ def handle_client(connection, address, stop_event):
         data = connection.recv(1024)
         if not data:
             break
+        connection.sendall(data)
         character = data.decode()  # Decodifica il singolo byte in un carattere
         print(f"Received: {character}.")
         if character == "c": 
