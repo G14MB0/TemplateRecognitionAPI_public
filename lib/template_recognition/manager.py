@@ -336,7 +336,7 @@ class Manager():
                         textOrg = (top_left[0], bottom_right[1] + labelSize[1] + baseLine)
 
                     # Disegna il nome del template sopra o sotto il rettangolo
-                    cv2.putText(frame, f"{key} - conf: {round(value["confidence"], 2)}", textOrg, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                    cv2.putText(frame, f"{key} - conf: {round(value['confidence'], 2)}", textOrg, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
                 
                 if self.showImageGray: frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 # Send frame to GUI process for display
