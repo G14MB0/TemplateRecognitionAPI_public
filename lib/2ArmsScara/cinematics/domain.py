@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Constants for the robot arms
-L1, L2, L3, L4, L5, L6 = 160, 160, 160, 160, 0, 180
+L1, L2, L3, L4, L5, L6 = 140, 140, 160, 160, 0, 160
 alpha = 0  # Base orientation angle, adjust as per your robot's configuration
 
 

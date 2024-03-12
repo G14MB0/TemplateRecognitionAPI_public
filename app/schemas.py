@@ -128,3 +128,13 @@ class TemplateTriggeringResponse(BaseModel):
 
 class ChangeThreshold(BaseModel):
     threshold: float = Field(description="Value of threshold. Reset at any manager initialization. limits: [0,1]")
+
+
+
+class ChangeTemplateList(BaseModel):
+    templateList: List = Field(description="A list of template to search for in the LiveSearching method")
+
+
+class SetUpDistance(BaseModel):
+    res: Tuple[int, int] = Field(default=(1280,720), description="Camera Resolution")
+    index: int = Field(default=0, description="Camera Index")

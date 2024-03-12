@@ -106,9 +106,17 @@ def stopProcesses():
         print("manager not initialized yet, call initializeManager")
 
 
+def closeAll():
+    manager = globalManager.getGlobalManager()
+    if manager:
+        manager.close()
+    else:
+        print("manager not initialized yet, call initializeManager")
 
 
-def changeLocalTrheshold(value: int):
+
+
+def changeLocalThreshold(value: int):
     if value < 0 or value > 1:
         raise ValueError("Trheashold should be in [0,1]")
     else:
@@ -120,15 +128,52 @@ def changeLocalTrheshold(value: int):
             raise RuntimeError("manager not initialized yet, call initializeManager")
 
 
+def changeLiveTemplateList(value: list):
+    manager = globalManager.getGlobalManager()
+    if manager:
+        manager.liveTemplateList = value
+        return {"message": f"live template list value correctly set to {value}"}
+    else:
+        raise RuntimeError("manager not initialized yet, call initializeManager")
+
+
 ######################################################
-##      FUNCTIONS TO BE DEFINED      ##
+##      FUNCTIONS DEFINED BUT NOT USED IN APIs      ##
 ######################################################
         
 def startLiveTrigger():
-    pass
+    manager = globalManager.getGlobalManager()
+    if manager:
+        manager.startLiveTrigger()
+    else:
+        print("manager not initialized yet, call initializeManager")
 
 def stopLiveTrigger():
-    pass
+    manager = globalManager.getGlobalManager()
+    if manager:
+        manager.stopLiveTrigger()
+    else:
+        print("manager not initialized yet, call initializeManager")
+
 
 def startLiveSearching():
     pass
+
+
+######################################################
+##    METODI WRAPPER DI MODULI AGGIUNTIVI           ##
+######################################################
+from lib.template_recognition.methods import aruco_operations as ao
+
+
+def getSetupDistance(res, camIndex):
+    """get the setup distance using ARUCO
+
+    Args:
+        res (_type_): _description_
+        camIndex (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """    
+    return {"distance": ao.calculateSetupDistance(res, camIndex)}

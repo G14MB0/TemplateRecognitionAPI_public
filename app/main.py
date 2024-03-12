@@ -62,8 +62,17 @@ async def lifespan(app: FastAPI):
     print("Server started with lifespan.")
     # Code here runs after the app startup
     print("---------------------------------------------------------------")
-    print("The app has started and this is the lifespan method telling you")
+    print("Welcome to the Template Recognition APIs")
+    print("To run this application, please check the API docs at")
+    print("127.0.0.1:7386/docs")
+    print("")
+    print("ʕノ•ᴥ•ʔノ ︵ ┻━┻")
+    print("")
+    print("To check for app documentations, please go to")
+    print("127.0.0.1:7386/mkdocs")
     print("---------------------------------------------------------------")
+
+
     
     yield  # This yield separates startup from shutdown code
 

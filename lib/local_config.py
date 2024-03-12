@@ -17,13 +17,18 @@ if not config_folder_path.exists():
     config_folder_path.mkdir()
 
 
-
 # default configuration 
 template = '''
 template_folder=D:/users/s005859/Pictures/templateRecognition/template
 saving_folder=D:/users/s005859/Pictures/templateRecognition/saving
 MATCHING_THRESHOLD=0.9
 is_colored=1
+LIVE_TRIGGER_INTERVAL=0.25
+DEFAULT_DISTANCE=30
+DEFAULT_RESOLUTION=1920,1080
+CAMERA_MATRIX=[[1917.9816403671446, 0, 926.6434327683447],[0, 1911.0427128637868 , 559.8249210810895],[0, 0, 1]]
+CAMERA_COEFFICIENTS=[-0.03626273835527005,-0.7921296942309466,-0.0011375203379303846,0.0010923311887219979,2.0635280952775354]
+ARUCO_SIZE=0.02
 '''
 
 

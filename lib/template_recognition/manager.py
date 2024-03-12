@@ -1,7 +1,9 @@
 import multiprocessing
+import queue
 import cv2
 
 from lib.template_recognition.methods import preliminary_operations as po
+from lib.template_recognition.methods import aruco_operations as ao
 from lib.template_recognition.methods.templateMatching import globalMatching
 from lib.template_recognition.methods.file_operation import saveFrameWithTemplates
 from lib import local_config
@@ -32,6 +34,22 @@ def worker(task, calculate_fps=None):
         
         return {"presence": res[0], "position": res[1], "template_name": res[2], "confidence": res[3]}
 
+
+def gui_process(frame_queue):
+    print("START GUI PROCESS")
+    while True:
+        if not frame_queue.empty():
+            frame = frame_queue.get()
+            if frame is None:
+                break
+            elif isinstance(frame, str):
+                cv2.destroyAllWindows()
+                continue
+            else:
+                cv2.namedWindow('Frame', cv2.WINDOW_AUTOSIZE)
+                cv2.imshow('Frame', frame)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    pass
 
 class Manager():
     def __init__(self, 
@@ -78,47 +96,80 @@ class Manager():
         ## VARIABLES
         self.pool = None
         self.processes = []
+        self.frame_queue = multiprocessing.Queue()
+        self.gui_proc = None
         self.lastLiveValue = {}
+        
+        self.lastLiveValueQueue = queue.Queue()
+        self.isLastLiveValueQueue = False
+
+        self.liveTemplateList = []
 
         self.threshold = float(g_matching_threshold)
 
         #____________________________________________________#
         #-      PRELIMINARY OPERATIONS                      -#
         #‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾#
+        
+        print("Loading Templates")
+        # Load all templates
+        self.setupDistance = ao.calculateSetupDistance(self.res, self.camIndex)
+        if self.setupDistance == -1:
+            self.setupDistance = float(local_config.readLocalConfig().get("DEFAULT_DISTANCE", -1))
+        
+        self.templates = po.scale_all_templates(po.load_all_templates(), self.setupDistance, res)
+        print("Templates Loaded")
+        
+        # for key, template in self.templates.items():
+        #     cv2.imshow(key, template["value"])
+        
+        # # Wait for a key press and then destroy all windows
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+
         # Set Camera 
         self.create_cap()
 
         self.set_cap("CAP_PROP_FRAME_WIDTH", self.res[0])
         self.set_cap("CAP_PROP_FRAME_HEIGHT", self.res[1])
-        
-        # Load all templates
-        self.templates = po.load_all_templates()
-
 
     ######################################################
     ##      GENERIC METHODS      ##
     ######################################################
     def loadAllTemplates(self):
-        self.templates = po.load_all_templates()
+        self.templates = po.scale_all_templates(po.load_all_templates(), self.setupDistance, self.res)
 
     ######################################################
     ##      CAMERA METHODS      ##
     ######################################################        
     def create_cap(self):
         print("connecting to camera, please wait...")
-        self.cap = cv2.VideoCapture(self.camIndex)  # 0 is usually the default webcam
+        self.cap = cv2.VideoCapture(self.camIndex, cv2.CAP_DSHOW)  # 0 is usually the default webcam
 
         # Imposta l'autoesposizione a 0 (disattiva l'autoesposizione se supportato)
-        self.cap.set(getattr(cv2, "CAP_PROP_AUTO_EXPOSURE"), 0.0)  # Nota: 0.25 in OpenCV disattiva l'autoesposizione su alcune webcam
+        self.cap.set(getattr(cv2, "CAP_PROP_AUTO_EXPOSURE"), 0.25)  # Nota: 0.25 in OpenCV disattiva l'autoesposizione su alcune webcam
         # Imposta l'esposizione a -7. Nota che il valore effettivo dipende dalla webcam e dal driver
         self.cap.set(getattr(cv2, "CAP_PROP_EXPOSURE"), -6.0)
         self.cap.set(getattr(cv2, "CAP_PROP_BRIGHTNESS"), -50)
         print("camera connected succesfully")
 
 
-    def set_cap(self, setting: str, value: Any):
-        if getattr(cv2, setting, None):
-            self.cap.set(getattr(cv2, setting), value)
+
+    def set_cap(self, setting: str, value: Any) -> bool:
+        setting_id = getattr(cv2, setting, None)
+        if setting_id:
+            # Attempt to apply the setting
+            success = self.cap.set(setting_id, value)
+            # Check if the setting was applied successfully
+            if success:
+                print(f"Setting {setting} applied successfully.")
+                return True
+            else:
+                print(f"Failed to apply setting {setting}.")
+        else:
+            print(f"Setting {setting} is not recognized.")
+        return False
+
     
 
 
@@ -129,6 +180,9 @@ class Manager():
     def startProcesses(self):
         """start the multiprocess execution pool.
         """        
+        self.gui_proc = multiprocessing.Process(target=gui_process, args=(self.frame_queue, ))
+        self.gui_proc.start()
+
         if self.multiprocess:
             start_time = time.time()  # Record the start time
             print("starting processes, please wait... ")
@@ -174,6 +228,7 @@ class Manager():
         globalResults = {}
         for _ in range(3):
             ret, frame = self.cap.read()
+            current = time.time()
             # ret, frame = (True, cv2.imread("./image.jpg"))
             if not ret:
                 print("Can't receive frame (stream end?). Exiting ...")
@@ -202,6 +257,7 @@ class Manager():
                         if result["presence"]:
                             results[template_name] = {"position": result["position"], "confidence": result["confidence"], "dimension": self.templates[template_name]["value"].shape}
 
+            print(f"inner instant check tooks: {time.time() - current}ms")
             self.setLastLiveValue(results)
 
             for key, item in results.items():
@@ -213,7 +269,7 @@ class Manager():
         return globalResults
 
 
-    def startLiveTrigger(self, templates: List = []):
+    def startLiveTrigger(self):
         """This methods start a live template matching using only templates in input
 
         Args:
@@ -225,7 +281,7 @@ class Manager():
             if self.multiprocess:
                 raise RuntimeError("multiprocess pool not initialized yet, please call startProcesses first")
         # Lista per tenere traccia dei template mancanti
-        missing_templates = [template_name for template_name in templates if template_name not in self.templates]
+        missing_templates = [template_name for template_name in self.liveTemplateList if template_name not in self.templates]
 
         # Verifica se ci sono template mancanti e li logga
         if missing_templates:
@@ -243,27 +299,52 @@ class Manager():
             results = {}
             tasks = []
             for template_name, template in self.templates.items():
-                if template_name in templates:
+                if template_name in self.liveTemplateList:
                     task = {"frame": frame, "template": template["value"], "template_name": template_name, "mask": template["mask"], "threshold": self.threshold, "isColored": self.isColored}
 
                     if not self.multiprocess:
                         # do template matching and append to results the result
                         res = globalMatching(task["frame"], task["template"], task["template_name"], task.get("searchArea", [(0, 0), (0, 0)]), task.get("mask", None))
                         if res[0]:
-                            results[template_name] = {"position": res[1], "confidence": res[3]}
+                            results[template_name] = {"position": res[1], "confidence": res[3], "dimension": self.templates[template_name]["value"].shape}
                     else:
                         # send to the pool executor the task
                         async_result = self.pool.apply_async(worker, args=(task,))
                         tasks.append((template_name, async_result))
 
-                if self.multiprocess:
-                    # Collect results of tasks previously sent to pool executor
-                    for template_name, async_result in tasks:
-                        result = async_result.get()
-                        if result["presence"]:
-                            results[template_name] = {"position": result["position"], "confidence": result["confidence"]}
+            if self.multiprocess:
+                # Collect results of tasks previously sent to pool executor
+                for template_name, async_result in tasks:
+                    result = async_result.get()
+                    if result["presence"]:
+                        results[template_name] = {"position": result["position"], "confidence": result["confidence"], "dimension": self.templates[template_name]["value"].shape}
 
-                self.setLastLiveValue(results)
+            self.setLastLiveValue(results)
+
+            if self.show:
+                # Show results to a live video
+                for key, value in results.items():
+                    top_left = (value["position"][0], value["position"][1])
+                    bottom_right =  (top_left[0]+value["dimension"][1], top_left[1]+value["dimension"][0])
+                    cv2.rectangle(frame, top_left, bottom_right, (0,255,0), 2)
+
+                    # Determina se c'è spazio sopra il rettangolo per il testo
+                    labelSize, baseLine = cv2.getTextSize(key, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+                    if top_left[1] - labelSize[1] - baseLine >= 0:  # Se c'è spazio sopra
+                        textOrg = (top_left[0], top_left[1] - baseLine)
+                    else:  # Altrimenti, posiziona il testo sotto il rettangolo
+                        textOrg = (top_left[0], bottom_right[1] + labelSize[1] + baseLine)
+
+                    # Disegna il nome del template sopra o sotto il rettangolo
+                    cv2.putText(frame, f"{key} - conf: {round(value["confidence"], 2)}", textOrg, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                
+                if self.showImageGray: frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                # Send frame to GUI process for display
+                self.frame_queue.put(frame)
+
+        self.frame_queue.put("pause")
+
+        
 
 
     def stopLiveTrigger(self):
@@ -366,7 +447,7 @@ class Manager():
         except:
             self.run = False
             print(traceback.print_exc())
-            if self.multiprocess:
+            if self.multiprocess and self.pool is not None:
                 self.pool.close()  # Chiude il pool di processi
                 self.pool.join()   # Attende che tutti i processi nel pool terminino
 
@@ -381,11 +462,18 @@ class Manager():
     def stop(self):
         print("Stopping manager operation ...")
         self.run = False
-        if self.multiprocess:
+        self.frame_queue.put(None)
+        if self.multiprocess and self.pool is not None:
             self.pool.close()  # Chiude il pool di processi
             self.pool.join()   # Attende che tutti i processi nel pool terminino
 
         cv2.destroyAllWindows()
+
+
+    @logFunctionDetail
+    def close(self):
+        self.stop()
+        self.cap.release()
 
 
     ######################################################
@@ -394,18 +482,46 @@ class Manager():
         
     def setLastLiveValue(self, value):
         self.lastLiveValue = value
+        if self.isLastLiveValueQueue:
+            self.lastLiveValueQueue.put(value)
         
     def getLastLiveValue(self):
+        if self.isLastLiveValueQueue:
+            return self.lastLiveValueQueue.get()
         return self.lastLiveValue
 
 
     def getInfo(self):
-        ### VA POPOLATA PER STAMPARE TUTTE LE INFO
-        return {}
+        """
+        Gathers and returns information about the current configuration and state of the instance.
+
+        Returns:
+            dict: A dictionary containing key-value pairs of attributes and their current values.
+        """
+        info = {
+            "saveFrame": self.saveFrame,
+            "saving_folder": self.saving_folder if hasattr(self, 'saving_folder') else "Not Set",
+            "camIndex": self.camIndex,
+            "resolution": self.res,
+            "showImage": self.show,
+            "showImageGray": self.showImageGray,
+            "run": self.run,
+            "isColored": self.isColored,
+            "processesNumber": self.processesNumber,
+            "multiprocess": self.multiprocess,
+            "threshold": self.threshold,
+            "setupDistance": self.setupDistance,
+            # Additional info about processes and templates might need a more complex representation
+            "processes": len(self.processes),
+            "templatesLoaded": len(self.templates) if hasattr(self, 'templates') else "Not Loaded",
+        }
+
+        return info
+
 
     def __str__(self):
         ### VA POPOLATA PER STAMPARE TUTTE LE INFO
-        return "questo è un oggetto della classe Manager()"
+        return str(self.getInfo())
     
 
 
