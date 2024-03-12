@@ -195,7 +195,6 @@ def closeAll():
 
 # def start_live_trigger_in_background(loop, manager):
 #     asyncio.run_coroutine_threadsafe(manager.startLiveTrigger(), loop)
-import asyncio
 
 @router.websocket("/ws/startLiveTrigger")
 async def websocket_endpoint_info(websocket: WebSocket):
@@ -204,7 +203,7 @@ async def websocket_endpoint_info(websocket: WebSocket):
     await websocket.accept()
     print("connection active")
     manager = global_var.globalManager.getGlobalManager()
-    manager.isLastLiveValueQueue = True
+    # manager.isLastLiveValueQueue = True
     if manager:
         print("manager live, start live triggering")
 
@@ -214,7 +213,7 @@ async def websocket_endpoint_info(websocket: WebSocket):
             while True:
                 lastValue = manager.getLastLiveValue()
                 await websocket.send_text(json.dumps(lastValue))
-                # await sleep(float(sample_time))
+                await sleep(float(sample_time))
         except WebSocketDisconnect:
             # Handle the disconnect
             manager.stopLiveTrigger()

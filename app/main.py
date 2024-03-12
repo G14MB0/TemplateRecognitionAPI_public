@@ -47,6 +47,7 @@ import threading
 origins = [
     "http://localhost:7387",
     "http://127.0.0.1:7387",
+    "*"
 ]
 
 
@@ -106,7 +107,8 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    # allow_origins=origins,
+    allow_origins="*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -1,4 +1,7 @@
 import requests
+import asyncio
+import websockets
+import json
 
 # Define the base URL for the API
 BASE_URL = "http://localhost:7386/api/v1/tm"
@@ -57,6 +60,31 @@ def check_instant_trigger(templates):
     data = {"templates": templates}
     response = requests.post(url, json=data)
     return response.json()
+
+
+
+async def receive_live_trigger(uri):
+    async with websockets.connect(uri) as websocket:
+        # Accept the connection
+        print("Connected to the server")
+        
+        try:
+            while True:
+                message = await websocket.recv()
+                print("Received message:", message)
+                
+        except websockets.exceptions.ConnectionClosed:
+            print("Connection with the server was closed")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+
+# Replace "ws://localhost:8000/ws/startLiveTrigger" with your actual WebSocket server URI
+uri = "ws://localhost:7386/ws/startLiveTrigger"
+
+# Start the event loop and the coroutine
+asyncio.get_event_loop().run_until_complete(receive_live_trigger(uri))
+
 
 # # Example sequence of API calls following the flowchart
 # if __name__ == "__main__":

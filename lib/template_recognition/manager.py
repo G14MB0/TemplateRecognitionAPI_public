@@ -212,7 +212,7 @@ class Manager():
         Returns:
             dict: dicitonary of results (keys -> position: tuple, confidence: float)
         """    
-        if self.pool is None:
+        if self.multiprocess and self.pool is None:
             print("multiprocess pool not initialized yet, please call startProcesses first")
             logger.warning("multiprocess pool not initialized yet, please call startProcesses first")
             if self.multiprocess:
