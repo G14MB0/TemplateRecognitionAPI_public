@@ -73,6 +73,7 @@ def saveFrameWithTemplates(frame: cv2.typing.MatLike,
                             rectangleColor: Tuple[int, int, int] = (0,255,0),
                             rectangleThickness: int = 2):
     
+
     for key, value in results.items():
         top_left = (value["position"][0], value["position"][1])
         bottom_right =  (top_left[0]+value["dimension"][1], top_left[1]+value["dimension"][0])
@@ -89,3 +90,5 @@ def saveFrameWithTemplates(frame: cv2.typing.MatLike,
         cv2.putText(frame, key, textOrg, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
     
     cv2.imwrite(f'{saving_folder}/{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_{"TM"}.jpg', frame)
+    
+    return frame

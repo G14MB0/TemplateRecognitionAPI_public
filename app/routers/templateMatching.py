@@ -16,7 +16,8 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 #pydantic things
 from typing import  List #list is used to define a response model that return a list
 
-
+from cv2 import imencode
+from base64 import b64encode
 
 
 
@@ -47,6 +48,7 @@ def initializeManager(data: schemas.InitializeManager):
       -  camIndex (int, optional): index of the USB camera, depends on how Windows chose index for usb camera. Defaults to 1.
       -  showImage (bool, optional): If true, show a live video in proper methods. Defaults to False.
       -  saveFrame (bool, optional): if true, save a frame locally only in instantTrigger. Defaults to True.
+      -  returnFrame (bool, optional): if true, save a frame locally only in instantTrigger. Defaults to True.
       -  showImageGray (bool, optional): if true, the image (showImage) is converted to gray. Defaults to False.
     """      
 
@@ -56,6 +58,7 @@ def initializeManager(data: schemas.InitializeManager):
     camIndex = data.camIndex
     showImage = data.showImage
     saveFrame = data.saveFrame
+    returnFrame = data.returnFrame
     showImageGray = data.showImageGray
     
     
@@ -65,6 +68,7 @@ def initializeManager(data: schemas.InitializeManager):
                       camIndex=camIndex, 
                       showImage=showImage, 
                       saveFrame=saveFrame,
+                      returnFrame=returnFrame,
                       showImageGray=showImageGray)
     
     return {"message": "Manager initialized successfully"}
@@ -128,6 +132,13 @@ def checkInstantTrigger(data: schemas.TemplateTriggering):
     try:
         current = time.time()
         res = wp.startInstantTrigger(data.templates)
+
+        if "frame" in res.keys():
+            _, buffer = imencode('.jpg', res["frame"])
+            # Convert to base64 encoding and decode to string
+            image_base64 = b64encode(buffer).decode('utf-8')
+            res["frame"] = image_base64
+
         print(f"check instant tooks: {time.time() - current}ms")
         return {"results": res}
     except Exception as e:

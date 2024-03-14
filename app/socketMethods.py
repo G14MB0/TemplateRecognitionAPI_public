@@ -24,9 +24,9 @@ def handle_client(connection, address, stop_event):
 
 def start_server(stop_event: threading.Event):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(('localhost', 12345))
+    server.bind(('localhost', 7384))
     server.listen()
-    print("Server listening on localhost:12345")
+    print("Socket Server listening on localhost:7384")
     
     while not stop_event.is_set():
         # Accetta connessioni se disponibili, altrimenti controlla lo stop_event

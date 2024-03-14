@@ -82,6 +82,11 @@ class Manager():
         else:
             self.saveFrame = False
 
+        if "returnFrame" in kwargs.keys():
+            self.returnFrame = kwargs["returnFrame"]
+        else:
+            self.returnFrame = True
+
         ## BASE SETTINGS
         self.camIndex = camIndex
         self.res = res
@@ -262,11 +267,18 @@ class Manager():
 
             for key, item in results.items():
                 if not key in globalResults.keys():
-                    globalResults[key] = item
+                    globalResults[key] = item   
 
-        if self.saveFrame and frame is not None: saveFrameWithTemplates(frame, globalResults, self.saving_folder)
+        
+        frameTemp = None
+        if self.saveFrame and frame is not None: frameTemp = saveFrameWithTemplates(frame, globalResults, self.saving_folder)
 
-        return globalResults
+        if self.returnFrame:
+            globalResults["frame"] = frameTemp
+            return globalResults
+        else:
+            return globalResults
+    
 
 
     def startLiveTrigger(self):

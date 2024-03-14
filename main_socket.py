@@ -17,9 +17,9 @@ def handle_client(connection, address):
 
 def start_server():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(('localhost', 12345))
+    server.bind(('localhost', 7384))
     server.listen()
-    print("Server listening on localhost:12345")
+    print("Socket Server listening on localhost:7384")
     
     while True:
         conn, addr = server.accept()

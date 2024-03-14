@@ -96,6 +96,7 @@ class InitializeManager(BaseModel):
     camIndex: int = Field(default=1, description="The index of the camera to be used. Defaults to 1.")
     showImage: bool = Field(default=False, description="Flag to show the processed image in a window, works only with Live Matching, no instant matching. Defaults to False.")
     saveFrame: bool = Field(default=True, description="Flag to enable or disable saving of matched frames locally. Defaults to True.")
+    returnFrame: bool = Field(default=True, description="Flag to enable or disable returning the frame after a instant match (with rectangles)")
     showImageGray: bool = Field(default=False, description="Flag to show the processed image in grayscale (used only if showImage is True). Defaults to False.")
     
     class Config:

@@ -42,19 +42,9 @@ def initialize_manager():
 # Start the Processes
 def start_processes():
 
-    conn = http.client.HTTPConnection("localhost", PORT)  # or use HTTPSConnection for HTTPS
-    conn.request("GET", "/api/v1/tm/startprocesses")
-
-    response = conn.getresponse()
-    print(response.status, response.reason)
-    data = response.read()
-    print(data.decode("utf-8"))
-
-    conn.close()
-
-    # url = f"{BASE_URL}/startprocesses"
-    # response = requests.get(url)
-    # return response.json()
+    url = f"{BASE_URL}/startprocesses"
+    response = requests.get(url)
+    return response.json()
 
 start_processes()
 
