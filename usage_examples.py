@@ -2,10 +2,13 @@ import requests
 import asyncio
 import websockets
 import json
+import http.client
 
 # Define the base URL for the API
 BASE_URL = "http://localhost:7386/api/v1/tm"
 SETTING_URL = "http://localhost:7386/api/v1/setting"
+
+PORT = 7386
 
 
 def set_setting(name, value):
@@ -40,9 +43,12 @@ def initialize_manager():
 
 # Start the Processes
 def start_processes():
+
     url = f"{BASE_URL}/startprocesses"
     response = requests.get(url)
     return response.json()
+
+start_processes()
 
 # Load the Templates
 def load_templates():
@@ -83,10 +89,10 @@ def check_instant_trigger(templates):
 #             print(f"An error occurred: {e}")
 
 
-# # Replace "ws://localhost:8000/ws/startLiveTrigger" with your actual WebSocket server URI
+# Replace "ws://localhost:8000/ws/startLiveTrigger" with your actual WebSocket server URI
 # uri = "ws://localhost:7386/ws/startLiveTrigger"
 
-# # Start the event loop and the coroutine
+# Start the event loop and the coroutine
 # asyncio.get_event_loop().run_until_complete(receive_live_trigger(uri))
 
 

@@ -20,6 +20,7 @@ def initializeManager(processNumber: int,
                       camIndex: int = 1, 
                       showImage: bool = False, 
                       saveFrame: bool = True,
+                      returnFrame: bool = True,
                       showImageGray: bool = False):
     """ initialize the manager object and pass it to the global_var class globalManager
 
@@ -38,6 +39,7 @@ def initializeManager(processNumber: int,
                                             res=resolution,
                                             multiprocess=multiprocess, 
                                             saveFrame=saveFrame,
+                                            returnFrame=returnFrame,
                                             showImageGray=showImageGray))
     
 

@@ -82,6 +82,11 @@ class Manager():
         else:
             self.saveFrame = False
 
+        if "returnFrame" in kwargs.keys():
+            self.returnFrame = kwargs["returnFrame"]
+        else:
+            self.returnFrame = True
+
         ## BASE SETTINGS
         self.camIndex = camIndex
         self.res = res
@@ -266,11 +271,18 @@ class Manager():
 
             for key, item in results.items():
                 if not key in globalResults.keys():
-                    globalResults[key] = item
+                    globalResults[key] = item   
 
-        if self.saveFrame and frame is not None: saveFrameWithTemplates(frame, globalResults, self.saving_folder)
+        
+        frameTemp = None
+        if self.saveFrame and frame is not None: frameTemp = saveFrameWithTemplates(frame, globalResults, self.saving_folder)
 
-        return globalResults
+        if self.returnFrame:
+            globalResults["frame"] = frameTemp
+            return globalResults
+        else:
+            return globalResults
+    
 
 
     def startLiveTrigger(self):
@@ -343,7 +355,7 @@ class Manager():
                         textOrg = (top_left[0], bottom_right[1] + labelSize[1] + baseLine)
 
                     # Disegna il nome del template sopra o sotto il rettangolo
-                    cv2.putText(frame, f"{key} - conf: {round(value["confidence"], 2)}", textOrg, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                    cv2.putText(frame, f"{key} - conf: {round(value['confidence'], 2)}", textOrg, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
                 
                 if self.showImageGray: frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 # Send frame to GUI process for display
