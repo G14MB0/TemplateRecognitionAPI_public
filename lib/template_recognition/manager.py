@@ -144,7 +144,11 @@ class Manager():
     ######################################################        
     def create_cap(self):
         print("connecting to camera, please wait...")
-        self.cap = cv2.VideoCapture(self.camIndex, cv2.CAP_DSHOW)  # 0 is usually the default webcam
+        # Initialize the video capture
+        if not isinstance(self.camIndex, int):
+            self.cap = cv2.VideoCapture(self.camIndex)
+        else:
+            self.cap = cv2.VideoCapture(self.camIndex, cv2.CAP_DSHOW)  # 0 is usually the default webcam
 
         # Imposta l'autoesposizione a 0 (disattiva l'autoesposizione se supportato)
         self.cap.set(getattr(cv2, "CAP_PROP_AUTO_EXPOSURE"), 0.25)  # Nota: 0.25 in OpenCV disattiva l'autoesposizione su alcune webcam
@@ -293,8 +297,11 @@ class Manager():
             ret, frame = self.cap.read()
             # ret, frame = (True, cv2.imread("./image.jpg"))
             if not ret:
-                print("Can't receive frame (stream end?). Exiting ...")
-                break
+                # print("Can't receive frame (stream end?). Exiting ...")
+                print("Can't receive frame (stream end?). retrying...")
+                time.sleep(1)
+                continue
+                # break
             
             results = {}
             tasks = []

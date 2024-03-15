@@ -3,7 +3,7 @@ This module contain pydantic schemas used to validate APIs I/O.
 You can find all the schemas in API reference
 """
 
-from typing import Optional, Tuple, List, Dict
+from typing import Optional, Tuple, List, Dict, Any
 import json
 
 from pydantic import BaseModel, validator, EmailStr, Field #used as an isistance() to check data type
@@ -93,7 +93,7 @@ class InitializeManager(BaseModel):
     processNumber: int = Field(default=4, description="The number of processes to be utilized. Defaults to 4.")
     resolution: Tuple[int, int] = Field(default=(1920, 1080), description="The resolution of the camera as a tuple (width, height). Defaults to 1920x1080.")
     multiprocess: bool = Field(default=True, description="Flag to enable or disable multiprocessing. Defaults to True.")
-    camIndex: int = Field(default=1, description="The index of the camera to be used. Defaults to 1.")
+    camIndex: Any = Field(default=1, description="The index of the camera to be used. Defaults to 1.")
     showImage: bool = Field(default=False, description="Flag to show the processed image in a window, works only with Live Matching, no instant matching. Defaults to False.")
     saveFrame: bool = Field(default=True, description="Flag to enable or disable saving of matched frames locally. Defaults to True.")
     showImageGray: bool = Field(default=False, description="Flag to show the processed image in grayscale (used only if showImage is True). Defaults to False.")
@@ -137,4 +137,4 @@ class ChangeTemplateList(BaseModel):
 
 class SetUpDistance(BaseModel):
     res: Tuple[int, int] = Field(default=(1280,720), description="Camera Resolution")
-    index: int = Field(default=0, description="Camera Index")
+    index: Any = Field(default=0, description="Camera Index")

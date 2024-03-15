@@ -29,7 +29,10 @@ def calculateSetupDistance(cameraRes: Tuple[int, int], cameraIndex: int) -> floa
     print(f"Initializing camera with index {cameraIndex}")
 
     # Initialize the video capture
-    cap = cv2.VideoCapture(cameraIndex, cv2.CAP_DSHOW)
+    if not isinstance(cameraIndex, int):
+        cap = cv2.VideoCapture(cameraIndex)
+    else:
+        cap = cv2.VideoCapture(cameraIndex, cv2.CAP_DSHOW)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, cameraRes[0])
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cameraRes[1])
     cap.set(cv2.CAP_PROP_EXPOSURE, -6.0)
