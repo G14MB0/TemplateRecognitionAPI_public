@@ -1,4 +1,6 @@
-# ***WIP***
+## Template Recognition APIs Wrapper
 
-No read.me at the moment since is still work in progress but, in general, this will be a fully functional template and audio pattern recognition with text identification
+This is a full application that publish RESTful APIs for template recognition tasks. 
+It uses FastAPI and Python-opencv.
 
+Go here to get a full docs -> [Docs](https://g14mb0.github.io/TemplateRecognitionAPI_public/)
