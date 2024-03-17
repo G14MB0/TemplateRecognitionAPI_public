@@ -128,7 +128,7 @@ else:
     # Application is running in a development environment
     application_path = "./"
 
-app.mount("/mkdocs", StaticFiles(directory=f"{application_path}/site", html=True), name="mkdocs")
+app.mount("/mkdocs", StaticFiles(directory=f"{application_path}/docs", html=True), name="mkdocs")
 
 
 @app.get("/")

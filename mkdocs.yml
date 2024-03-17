@@ -1,4 +1,6 @@
 site_name: Audio, Image and Text Recognition APIs
+site_dir: docs
+docs_dir: mkdocs
 # pip install mkdocstrings[python]>=0.18 per installare Griffe altrimenti nun va
 nav:
   - Home: 'index.md'
