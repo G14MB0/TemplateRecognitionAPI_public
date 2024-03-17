@@ -13,7 +13,7 @@ import os
 # Ottieni il percorso assoluto della directory dello script corrente
 dir_path = os.path.dirname(os.path.abspath(__file__))
 # Costruisci il percorso del database relativamente a quella directory
-db_path = os.path.join(dir_path, 'R2T_IOD.db')
+db_path = os.path.join(dir_path, 'DATABASE.db')
 
 SQLALCHEMY_DATABASE_URL = f'sqlite:///{db_path}'
 
