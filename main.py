@@ -41,7 +41,7 @@ configure_logger()
 
 ### Parameters for uvicorn server
 # HOST = "127.0.0.1"
-HOST = "127.0.0.1"
+HOST = "0.0.0.0"
 PORT = 7386
 WORKERS = 1
 OVERRIDE = False # Force close any other service on the same port (Not a good practice, must be used carefully or modified)

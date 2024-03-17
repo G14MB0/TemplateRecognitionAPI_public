@@ -23,7 +23,7 @@ Thumbs.db  # For Windows
 build/
 dist/
 output/
-site/
+
 *.egg-info/
 
 # Log files

@@ -116,7 +116,7 @@ app.add_middleware(
 )
 
 
-app.include_router(data.router, prefix="/api/v1")
+# app.include_router(data.router, prefix="/api/v1")
 app.include_router(setting.router, prefix="/api/v1")
 app.include_router(templateMatching.router, prefix="/api/v1")
 
